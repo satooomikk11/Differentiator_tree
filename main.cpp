@@ -5,6 +5,55 @@
 #include "tree_dump.h"
 #include "differentiator.h"
 
+int main()
+{
+    Tree* loaded_tree = (Tree*)calloc(1, sizeof(Tree));
+    if (!loaded_tree)
+    {
+        printf("Ошибка выделения памяти для дерева!\n");
+        return 1;
+    }
+    
+    TreeErr_t load_result = TreeLoadFromFile(loaded_tree, "tree_save.txt");
+    
+    if (load_result != TREE_OK)
+    {
+        printf("Ошибка загрузки дерева из файла!\n");
+        free(loaded_tree);
+        return 1;
+    }
+    
+    TreeDump(loaded_tree, "function_loaded", 0);
+    
+    TreeNode* deriv_root = Differentiate(loaded_tree->root, 'x');
+    
+    if (!deriv_root)
+    {
+        printf("Error: Не удалось взять производную!\n");
+        DestroyTree(loaded_tree);
+        return 1;
+    }
+    
+    Tree* deriv_tree = CreateTree(deriv_root);
+    TreeDump(deriv_tree, "derivative", 1);
+    
+    TreeSaveToFile(deriv_tree, "derivative_save.txt");
+    
+    DestroyTree(loaded_tree);
+    DestroyTree(deriv_tree);
+    
+    return 0;
+}
+
+
+/*
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "tree_functions.h"
+#include "tree_dump.h"
+#include "differentiator.h"
+
 TreeNode* ParseExpression();
 
 // todo: нормальный парсинг
@@ -51,34 +100,55 @@ int main()
         return 1;
     }
     
-    // сначала дамп начального выражения
-    TreeDump(func_tree, "function", 0);
+    printf("Сохранение дерева в файл 'tree_save.txt'...\n");
+    TreeErr_t save_result = TreeSaveToFile(func_tree, "tree_save.txt");
     
-    TreeNode* deriv_root = Differentiate(func_root, 'x');
+    if (save_result != TREE_OK)
+    {
+        printf("Ошибка сохранения дерева в файл!\n");
+        DestroyTree(func_tree);
+        return 1;
+    }
+    
+    Tree* loaded_tree = (Tree*)calloc(1, sizeof(Tree));
+    if (!loaded_tree)
+    {
+        printf("Ошибка выделения памяти для дерева!\n");
+        DestroyTree(func_tree);
+        return 1;
+    }
+    
+    TreeErr_t load_result = TreeLoadFromFile(loaded_tree, "tree_save.txt");
+    
+    if (load_result != TREE_OK)
+    {
+        printf("Ошибка загрузки дерева из файла!\n");
+        DestroyTree(func_tree);
+        free(loaded_tree);
+        return 1;
+    }
+    
+    TreeDump(loaded_tree, "function_loaded", 0);
+    
+    TreeNode* deriv_root = Differentiate(loaded_tree->root, 'x');
     
     if (!deriv_root)
     {
-        printf("Error: Не удалось чота производную взять!\n");
+        printf("Error: Не удалось взять производную!\n");
         DestroyTree(func_tree);
+        DestroyTree(loaded_tree);
         return 1;
     }
     
-    // создаем дерево производной
     Tree* deriv_tree = CreateTree(deriv_root);
+    TreeDump(deriv_tree, "derivative", 1);
     
-    if (!deriv_tree)
-    {
-        printf("Error: Не получилось создать дерево производной!\n");
-        DestroyTree(func_tree);
-        return 1;
-    }
+    TreeSaveToFile(deriv_tree, "derivative_save.txt");
     
-    // дампим результат
-    TreeDump(deriv_tree, "derivative_raw", 1);
-
-    // Освобождаем память
     DestroyTree(func_tree);
+    DestroyTree(loaded_tree);
     DestroyTree(deriv_tree);
     
     return 0;
 }
+    */

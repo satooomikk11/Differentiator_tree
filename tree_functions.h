@@ -30,7 +30,7 @@ enum Operator
 struct TreeNode
 {
     NodeType type;
-    // в зависимоти от типа данных
+    // в зависимости от типа данных
     union
     {
         double number;
@@ -48,18 +48,34 @@ struct Tree
     size_t size;
 };
 
+// коды ошибок
+typedef enum
+{
+    TREE_OK = 0,
+    TREE_ERR_FILE,
+    TREE_ERR_MEMORY,
+    TREE_ERR_PARSE
+} TreeErr_t;
+
 // всё что связано с узлами
 TreeNode* CreateNumberNode(double value);
 TreeNode* CreateVariableNode(char variable);
 TreeNode* CreateOperatorNode(Operator op, TreeNode* left, TreeNode* right);
 TreeNode* CreateFunctionNode(const char* func_name, TreeNode* arg);
 
-
 Tree* CreateTree(TreeNode* root);
 
 // копирование поддерева
 TreeNode* CopySubtree(TreeNode* node);
 
+// вся фигня с файловой записью
+TreeErr_t TreeSaveToFile(Tree* tree, const char* filename);
+TreeErr_t TreeSaveNodeToFile(TreeNode* node, FILE* filestream);
+TreeErr_t TreeLoadFromFile(Tree* tree, const char* filename);
+TreeErr_t CreateTreeFromStr(Tree* tree, const char* str);
+TreeNode* CreateNodeFromStr(const char** str_ptr);
+void      SkipSpaces(const char** str_ptr);
+size_t    CountNodes(TreeNode* node);
 
 void DestroyTree(Tree* tree);
 void DestroyTreeNode(TreeNode* node);
